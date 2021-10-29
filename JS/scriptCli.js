@@ -1,10 +1,13 @@
-const endpointCli = "http://150.230.89.106:8080/api/Client/all";
+const endpointCli = "http://localhost:8080/api/Client/all";
 const etpCli = document.getElementById("informacionCli");
 /** capturar bones decliente */
 const bmostrarCli = document.getElementById("bmostrarCli");
 const bguardarCli = document.getElementById("bguardarCli");
+const bactualizarCli = document.getElementById("bactualizarCli");
+const beliminarCli = document.getElementById("beliminarCli");
 
 /** captura de los inputs de la interfaz html para clientes */
+const idCli = document.getElementById("idCli");
 const nombre = document.getElementById("nombre");
 const email = document.getElementById("email");
 const age = document.getElementById("age");
@@ -27,7 +30,7 @@ function peticiongetCli() {
 function peticionpostCli() {
   $.ajax({
     method: "POST",
-    url: "http://150.230.89.106:8080/api/Client/save",
+    url: "http://localhost:8080/api/Client/save",
     data: capturarClientes(),
     datatype: "json",
     contentType: "application/json",
@@ -40,10 +43,43 @@ function peticionpostCli() {
   });
 }
 
+function peticionputCli() {
+  $.ajax({
+    method: "PUT",
+    url: "http://localhost:8080/api/Client/update",
+    data: capturarClientes(),
+    datatype: "json",
+    contentType: "application/json",
+    complete: function (response) {
+      mostrarResultadoCli(response.status, "Se guardó con exito");
+      //console.log(response.status);
+      limpiarCampoCli();
+      peticiongetCli();
+    },
+  });
+}
+
+function peticionDeleteCli() {
+  $.ajax({
+    method: "DELETE",
+    url: "http://localhost:8080/api/Client/delete",
+    data: captIdCli(),
+    datatype: "json",
+    contentType: "application/json",
+    complete: function (response) {
+      resultadoEliminarCli(response.status);
+      limpiarCampoCli();
+      peticiongetCli();
+    },
+  });
+}
+
 function getCliente(clientes) {
   let myTable = "<table>";
   for (i = 0; i < clientes.length; i++) {
     myTable += "<tr>";
+    myTable +=
+      "<td>" + "<strong>idClient: </strong>" + clientes[i].idClient + "</td>";
     myTable +=
       "<td>" + "<strong>email: </strong>" + clientes[i].email + "</td>";
     myTable +=
@@ -59,6 +95,7 @@ function getCliente(clientes) {
 
 function capturarClientes() {
   const data = {
+    idClient: $("#idCli").val(),
     email: $("#email").val(),
     password: $("#password").val(),
     name: $("#nombre").val(),
@@ -78,6 +115,7 @@ function mostrarResultadoCli(status, texto) {
 }
 
 function limpiarCampoCli() {
+  idCli.value = "";
   nombre.value = "";
   email.value = "";
   age.value = "";
@@ -98,6 +136,28 @@ function validarCampoCli() {
   }
 }
 
+function captIdCli() {
+  const data = {
+    idClient: idCli.value,
+  };
+  return JSON.stringify(data);
+}
+
+function resultadoEliminarCli(status) {
+  if (status == 204) {
+    alert("Registro eliminado");
+  }
+}
+
+function validarCampoEliCli() {
+  if (idCli.value == "") {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
 bmostrarCli.addEventListener("click", (e) => {
   e.preventDefault();
   peticiongetCli();
@@ -109,5 +169,25 @@ bguardarCli.addEventListener("click", (e) => {
     alert("campo(s) Vacio!!");
   } else {
     peticionpostCli();
+  }
+});
+
+
+bactualizarCli.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (validarCampoCli()) {
+    alert("Campo(s) vacio!!");
+  } else {
+    peticionputCli();
+  }
+});
+
+
+beliminarCli.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (validarCampoEliCli()) {
+    alert("Campo id Vacio!!");
+  } else {
+    peticionDeleteCli();
   }
 });
